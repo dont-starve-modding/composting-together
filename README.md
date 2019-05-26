@@ -56,13 +56,13 @@ Special thanks to Malacath for the great support!
 #### Bonuses
 
 * If you compost some food which let you gain at least 4 poop (recipe+rottyness bonus (4.)), the compost pile develops fertile soil. (This is a durable status (until the pile gets burnt))
-* If you have spoilable food, you receive a bonus on the composting time. Factor = 0.5 + (totalSpoilage / (2*spoiledFoodCount)). Example: 5 berries are half spoiled (50%=0.5). totalSpoilage = 5 * 0.5 = 2.5. spoiledFoodCount = 5 --> Factor = 0.5 + (2.5 / 10) = 0.75. Therefore the composttime is reduced by 25%
-* If you have fertile soil (see 1.), the composttime is reduced by 10% (If your reduced composttime (2.) is 20%, the complete reduction will be 28% (0.8*0.9))
+* If you have spoilable food, you receive a bonus on the composting time. ``Factor = 0.5 + (totalSpoilage / (2*spoiledFoodCount))``. Example: 5 berries are half spoiled. ``totalSpoilage = 5 * 0.5 = 2.5``. ``spoiledFoodCount = 5`` --> ``Factor = 0.5 + (2.5 / 10) = 0.75``. Therefore the composttime is reduced by 25%
+* If you have fertile soil (see 1.), the composttime is reduced by 10% (If your reduced composttime (2.) is 20%, the complete reduction will be 28% (``0.8*0.9``))
 * If you compost some food which has an average spoilage of lower than 33% (this is nearly red), you receive one extra poop on harvesting. (rottyness bonus)
 
-* The composting time bonuses can summarize to an - asymptotic - maximum of 0.5*0.9 = 0.45
+* The composting time bonuses can summarize to an maximum of ``0.5*0.9 = 0.45``
 
 #### Burnable
 
-* If you burn the pile when it was done, you will receive the amount of poop you'd received by harvesting plus 1. (Large recipe with 3xpoop will drop 4xash)
+* If you burn the pile when it was done, you will receive ash as the amount of poop you'd received by harvesting plus 1. (Large recipe with 3xpoop will drop 4xash)
 * Piles that are empty or are rotting at the moment will not drop ash.
