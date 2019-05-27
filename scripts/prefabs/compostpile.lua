@@ -175,7 +175,7 @@ local function makeburnable(inst)
 			inst:RemoveComponent("propagator")
 		end
 			
-		inst:DoTaskInTime( 0.5, changes)
+		inst:DoTaskInTime(0.5, changes)
 		for _ = 0, inst.components.composter.poopamount+1, 1 do
 			inst.components.lootdropper:SpawnLootPrefab("ash")	
 		end
@@ -251,7 +251,12 @@ local function makecontainer(inst)
 	end
 	
 	function compostpileparams.widget.buttoninfo.validfn(inst)
-		return inst.replicat.container ~= nil and inst.replica.composter:CanCompost()
+		local num = 0
+		for k,v in pairs (inst.components.container.slots) do
+			num = num + 1 
+		end
+
+		return inst.replica.container ~= nil and num > 2
 		-- return inst.replica.container ~= nil and inst.replica.container:IsFull()
 	end
 
@@ -279,7 +284,7 @@ local function makecomposter(inst)
 			inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds")
 		-- addflies(inst)
 		-- makeburnable(inst)		
-	end
+		end
 	end
 
 	local function continuedonefn(inst)
@@ -355,6 +360,8 @@ local function fn()
 	inst.entity:AddSoundEmitter()
 	inst.entity:AddMiniMapEntity()
 	inst.entity:AddNetwork()
+
+	MakeObstaclePhysics(inst, 0.9)
     
     inst:AddTag("structure")
     
@@ -365,24 +372,19 @@ local function fn()
 	inst.AnimState:SetLayer(LAYER_BACKGROUND)
 	inst.AnimState:SetSortOrder(3)
 	
-	inst.MiniMapEntity:SetIcon( "farm2.png" )
+	inst.MiniMapEntity:SetIcon("farm2.png")
 
 	inst.Transform:SetRotation(45)
 	
 	inst._burnt = net_bool(inst.GUID, "compostpile._burnt", "burntdirty")
 
 	inst.decor = {}
-	-- if not TheNet:IsDedicated() then
-	-- 	inst.decor = {}
-	-- end
 
 	MakeSnowCoveredPristine(inst)
 
 	inst.entity:SetPristine()
 
 	if not TheWorld.ismastersim then
-		inst:ListenForEvent("burntdirty", OnBurntDirty) -- TODO fn
-
 		return inst
 	end
 
@@ -393,16 +395,13 @@ local function fn()
 	MakeLargeBurnable(inst, nil, nil, true)
 	MakeMediumPropagator(inst)
 
-	inst.OnSave = onsave
-	inst.OnLoad = onload
-
-    inst:AddComponent("playerprox")
-    inst.components.playerprox:SetDist(3,5)
-    inst.components.playerprox:SetOnPlayerFar(onfar)
+    -- inst:AddComponent("playerprox") -- TODO valid in DST?
+    -- inst.components.playerprox:SetDist(3,5)
+    -- inst.components.playerprox:SetOnPlayerFar(onfar)
 	
-    -- inst.components.inventoryitem:SetOnDroppedFn(function() inst.flies = inst:SpawnChild("flies") end )
-    -- inst.components.inventoryitem:SetOnPickupFn(function() if inst.flies then inst.flies:Remove() inst.flies = nil end end )
-    -- inst.components.inventoryitem:SetOnPutInInventoryFn(function() if inst.flies then inst.flies:Remove() inst.flies = nil end end )
+    -- inst.components.inventoryitem:SetOnDroppedFn(function() inst.flies = inst:SpawnChild("flies") end)
+    -- inst.components.inventoryitem:SetOnPickupFn(function() if inst.flies then inst.flies:Remove() inst.flies = nil end end)
+    -- inst.components.inventoryitem:SetOnPutInInventoryFn(function() if inst.flies then inst.flies:Remove() inst.flies = nil end end)
 
 	makecontainer(inst)
 
@@ -423,32 +422,24 @@ local function fn()
 	inst.components.hauntable.cooldown = TUNING.HAUNT_COOLDOWN_SMALL
 	inst.components.hauntable:SetOnHauntFn(OnHaunt)
 
-	for k, item_info in pairs( elements ) do
-		for item_name, item_offsets in pairs( item_info ) do
-			for l, offset in pairs( item_offsets ) do
-				local item_inst = SpawnPrefab( item_name )
-				item_inst.entity:SetParent( inst.entity )
-				item_inst.Transform:SetPosition( offset[1], offset[2], offset[3] )
-				table.insert( inst.decor, item_inst )
+	for k, item_info in pairs(elements) do
+		for item_name, item_offsets in pairs(item_info) do
+			for l, offset in pairs(item_offsets) do
+				local item_inst = SpawnPrefab(item_name)
+				item_inst.entity:SetParent(inst.entity)
+				item_inst.Transform:SetPosition(offset[1], offset[2], offset[3])
+				table.insert(inst.decor, item_inst)
 			end
 		end
 	end
 
+    MakeSnowCovered(inst)
+
+	inst.OnSave = onsave
+	inst.OnLoad = onload
+
     return inst
 end
-
--- return 
-	-- Prefab("common/inventory/compostpile", fn, assets, prefabs), 
-	-- correct? Prefab("compostpile", fn, assets, prefabs),
-	-- Prefab("fast_farmplot", plot(3), assets, prefabs),
-
-	-- MakePlacer("common/compostpile_placer", "compostpile", "compostpile", "idle_empty" ) 
-	-- correct? MakePlacer(			"compostpile", 	"compostpile", 	"compostpile", 	"full", true, 
-		-- nil, 	nil, 		nil, 	90, 				nil, 	nil)
-	-- MakePlacer("fast_farmplot_placer", "farmplot", "farmplot", "full", true, nil, nil, nil, 90, nil, placerdecor(3))
-
--- function MakePlacer(	name,			bank,			 build, 		anim, 	onground, 
--- 		snap,	metersnap, 	scale, 	fixedcameraoffset, facing, 	postinit_fn)
 
 return Prefab("compostpile", fn, assets, prefabs),
     MakePlacer("compostpile_placer", "compostpile", "compostpile", "idle_empty")

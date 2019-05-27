@@ -62,6 +62,23 @@ GLOBAL.ACTIONS.COMPOST.fn  = function(act)
     end
 end
 
+AddComponentAction("SCENE", "composter", function(inst, doer, actions, right)
+    if not inst:HasTag("burnt") and
+        not (doer.replica.rider ~= nil and doer.replica.rider:IsRiding()) then
+        if inst:HasTag("donecomposting") then
+            table.insert(actions, GLOBAL.ACTIONS.HARVEST)
+        elseif right and
+            -- (
+            inst:HasTag("readytocompost")
+            -- or (inst.replica.container ~= nil and
+            --     inst.replica.container:IsFull() and
+            --     inst.replica.container:IsOpenedBy(doer))) 
+                then
+            table.insert(actions, GLOBAL.ACTIONS.COMPOST)
+        end
+    end
+end)
+
 -- constants
 
 -- composting times
@@ -69,10 +86,10 @@ TUNING.COMPOSTPILE_SMALLCOMPOST_TIME = TUNING.TOTAL_DAY_TIME * 3
 TUNING.COMPOSTPILE_MEDCOMPOST_TIME = TUNING.TOTAL_DAY_TIME * 2
 TUNING.COMPOSTPILE_LARGECOMPOST_TIME = TUNING.TOTAL_DAY_TIME * 2.2
 TUNING.COMPOSTPILE_ENLIGHTEDCOMPOST_TIME = TUNING.TOTAL_DAY_TIME * 4
---TUNING.COMPOSTPILE_SMALLCOMPOST_TIME = TUNING.TOTAL_DAY_TIME * 0.05
---TUNING.COMPOSTPILE_MEDCOMPOST_TIME = TUNING.TOTAL_DAY_TIME * 0.05
---TUNING.COMPOSTPILE_LARGECOMPOST_TIME = TUNING.TOTAL_DAY_TIME * 0.05
---TUNING.COMPOSTPILE_LONGCOMPOST_TIME = TUNING.TOTAL_DAY_TIME * 0.05
+-- TUNING.COMPOSTPILE_SMALLCOMPOST_TIME = TUNING.TOTAL_DAY_TIME * 0.025
+-- TUNING.COMPOSTPILE_MEDCOMPOST_TIME = TUNING.TOTAL_DAY_TIME * 0.025
+-- TUNING.COMPOSTPILE_LARGECOMPOST_TIME = TUNING.TOTAL_DAY_TIME * 0.025
+-- TUNING.COMPOSTPILE_ENLIGHTEDCOMPOST_TIME = TUNING.TOTAL_DAY_TIME * 0.025
 
 -- recipe poop values
 TUNING.COMPOSTPILE_SMALLCOMPOST_POOPAMOUNT = 1
