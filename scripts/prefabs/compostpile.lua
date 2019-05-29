@@ -86,6 +86,7 @@ local elements = {
 				{ left - 1.0,  0, back + 0.15 },
 				{ right + 1, 0, back + 0.15 },
 				{ left - 0.5,  0, back + 0.65 },
+				{ left - 0.5,  0, back + 2.15 },
 				{ right + 0.5,  0, back + 0.15 },
 				{ right + 0.5,  0, back + 1.65 },
 			},
@@ -94,9 +95,8 @@ local elements = {
 		{ fencepostright = {
 				{ left - 0.5,  0, back + 0.15 },
 				{ 0,		   0, back + 0.15 },
-				{ left - 0.5,  0, back + 1.65 },
 				{ left - 0.5,  0, back + 1.15 },
-				{ left - 0.5,  0, back + 2.15 },
+				{ left - 0.5,  0, back + 1.65 },
 				{ 0,		    0, back + 0.15 },
 				{ right + 0.5,  0, back + 0.65 },
 				{ right + 0.5,  0, back + 1.15 },
