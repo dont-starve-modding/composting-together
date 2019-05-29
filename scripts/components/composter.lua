@@ -35,8 +35,8 @@ local Composter = Class(function(self, inst)
     self.composting = false
     self.done = false
     
-    self.product = nil
 		self.poopamount = 0
+		self.rotamount = 0
 		self.rottyness = 0
 		self.fertilesoil = false
 		self.spawnfireflies = 0
@@ -135,7 +135,7 @@ function Composter:StartComposting(time)
 			end
 			
 			local composttime = TUNING.TOTAL_DAY_TIME*5
-			self.poopamount, composttime, self.spawnfireflies = composting.CalculateRecipe(self.inst.prefab, compostables)
+			self.poopamount, self.rotamount, composttime, self.spawnfireflies = composting.CalculateRecipe(self.inst.prefab, compostables)
 						
 			-- lower the composting time by given spoilage grade. spoilage total average spoilage of 50% lowers compost time by 25% (avg 20% -> 40%)
 			-- maximum lowering-grade is 50% here
@@ -151,16 +151,16 @@ function Composter:StartComposting(time)
 			end
 			
 			-- if the compost pile is very fertile lower composttime by 10% again
-			if(self.fertilesoil) then
+			if (self.fertilesoil) then
 				composttime = composttime * (1.0-TUNING.COMPOSTPILE_FERTILE_SOIL_ADVANTAGE_PERCENT)
 			end
 			
-			--all together composttime lowering-grade is 55%
+			-- all together composttime lowering-grade is 55%
 			
 			-- when putting a huge amount of big fruits and veggies on the pile + given spoilage, the pile becomes extra fertile
-			if(self.poopamount + self.rottyness >= TUNING.COMPOSTPILE_FERTILESOIL_THRES) then
+			if self.poopamount + self.rottyness >= TUNING.COMPOSTPILE_FERTILESOIL_THRES then
 				self.fertilesoil = true
-				GetPlayer().components.talker:Say("What a mess!")
+				GetPlayer().components.talker:Say("I can see some hard working worms!")
 			end
 
 			print("receive", self.poopamount, "poop");
@@ -199,8 +199,6 @@ end
 -- 					prod:DoTaskInTime(0, StopProductPhysics)
 -- 			end
 -- 	end
--- 	self.product = nil
--- 	self.product_spoilage = nil
 -- 	self.spoiltime = nil
 -- 	self.targettime = nil
 -- 	self.done = nil
@@ -208,6 +206,15 @@ end
 
 
 function Composter:OnSave()
+	print("saving...")
+	print(self.remainingtime)
+	print(self.composting)
+	print(self.done)
+	print(self.fertilesoil)
+	print(self.poopamount)
+	print(self.rotamount)
+	print(self.rottyness)
+	print(self.spawnfireflies)
 	return {
 		remainingtime = self.targettime ~= nil and self.targettime - GetTime() or 0,
 		composting = self.composting,
@@ -215,47 +222,58 @@ function Composter:OnSave()
 		
 		fertilesoil = self.fertilesoil,
 		poopamount = self.poopamount,
+		rotamount = self.rotamount,
 		rottyness = self.rottyness,
 		spawnfireflies = self.spawnfireflies,
-		product = self.product,
 	}
 end
 
 function Composter:OnLoad(data)
+	print("loading...")
+	print(data.remainingtime)
+	print(data.composting)
+	print(data.done)
+	print(data.fertilesoil)
+	print(data.poopamount)
+	print(data.rotamount)
+	print(data.rottyness)
+	print(data.spawnfireflies)
+
 	self.fertilesoil = data.fertilesoil
+	self.composting = data.composting or nil
+	self.done = data.done or nil
+	self.poopamount =data.poopamount;
+	self.rotamount = data.rotamount;
+	self.rottyness = data.rottyness;
+	self.spawnfireflies = data.spawnfireflies;
 
-	if data.product ~= nil then
-		self.done = data.done or nil
-		self.product = data.product
+	if self.task ~= nil then
+			self.task:Cancel()
+			self.task = nil
+	end
+	self.targettime = nil
 
-		if self.task ~= nil then
-				self.task:Cancel()
-				self.task = nil
-		end
-		self.targettime = nil
+	if data.remainingtime ~= nil then
+		self.targettime = GetTime() + math.max(0, data.remainingtime)
+		print("remainingtime " ..data.remainingtime)
+		print("targettime "..self.targettime)
 
-		if data.remainingtime ~= nil then
-			self.targettime = GetTime() + math.max(0, data.remainingtime)
-			print("remainingtime " ..data.remainingtime)
-			print("targettime "..self.targettime)
-
-			if self.done then
-				if self.oncontinuedone ~= nil then
-						self.oncontinuedone(self.inst)
-				end
-			else
-				self.task = self.inst:DoTaskInTime(data.remainingtime, docompost, self)
-				if self.oncontinuecomposting ~= nil then
-						self.oncontinuecomposting(self.inst)
-				end
+		if self.done then
+			if self.oncontinuedone ~= nil then
+					self.oncontinuedone(self.inst)
 			end
-		elseif self.oncontinuedone ~= nil then
-				self.oncontinuedone(self.inst)
+		else
+			self.task = self.inst:DoTaskInTime(data.remainingtime, docompost, self)
+			if self.oncontinuecomposting ~= nil then
+					self.oncontinuecomposting(self.inst)
+			end
 		end
+	elseif self.oncontinuedone ~= nil then
+			self.oncontinuedone(self.inst)
+	end
 
-		if self.inst.components.container ~= nil then
-				self.inst.components.container.canbeopened = false
-		end
+	if self.inst.components.container ~= nil then
+			self.inst.components.container.canbeopened = false
 	end
 end
 
@@ -273,10 +291,6 @@ function Composter:GetDebugString()
 	if self.targettime then
 			str = str.." ("..tostring(self.targettime - GetTime())..")"
 	end
-	
-	if self.product then
-		str = str.." ".. self.product
-	end
     
 	return str
 end
@@ -288,19 +302,35 @@ function Composter:Harvest(harvester)
 		end
 
 		self.done = nil
-		local loot = SpawnPrefab("poop")
-		loot.components.stackable:SetStackSize(self.poopamount + self.rottyness)
-	
-		if harvester ~= nil and harvester.components.inventory ~= nil then
-			harvester.components.inventory:GiveItem(loot, nil, self.inst:GetPosition())
-		else
+
+		local poop_stacksize = self.poopamount + self.rottyness
+		local rot_stacksize = self.rotamount
+
+		print("stack: "..poop_stacksize)
+		if poop_stacksize > 0 then
+			local loot = SpawnPrefab("poop")
+			loot.components.stackable:SetStackSize(poop_stacksize)
+			if harvester ~= nil and harvester.components.inventory ~= nil then
+				harvester.components.inventory:GiveItem(loot, nil, self.inst:GetPosition())
+			else
 				LaunchAt(loot, self.inst, nil, 1, 1)
+			end
 		end
-		self.product = nil
+
+		if rot_stacksize > 0 then
+			local loot_rot = SpawnPrefab("spoiled_food")
+			loot.components.stackable:SetStackSize(rot_stacksize)
+			if harvester ~= nil and harvester.components.inventory ~= nil then
+				harvester.components.inventory:GiveItem(loot_rot, nil, self.inst:GetPosition())
+			else
+				LaunchAt(loot_rot, self.inst, nil, 1, 1)
+			end
+		end
 		
 		if math.random() <= self.spawnfireflies then
-			local item_inst = SpawnPrefab( "fireflies" )
+			local item_inst = SpawnPrefab("fireflies")
 			item_inst.entity:SetParent(self.inst.entity)
+			GetPlayer().components.talker:Say("I see bugs!")
 		end
 
 		if self.task ~= nil then

@@ -117,13 +117,13 @@ local function onhammered(inst, worker)
 end
 
 
-local slotpos = {	Vector3(0,32+4,0),
-					Vector3(-(32+4),-(32+4),0), 
-					Vector3((32+4),-(32+4),0),
-					Vector3(-(32+4),-(64+32+8+4),0), 
-					Vector3((32+4),-(64+32+8+4),0)}
-
-				
+local slotpos = {	
+	Vector3(0,			32+4,			0),
+	Vector3(-(32+4),	-(32+4),		0), 
+	Vector3((32+4),		-(32+4),		0),
+	Vector3(-(32+4),	-(64+32+8+4),	0), 
+	Vector3((32+4),		-(64+32+8+4),	0)
+}	
 
 --anim and sound callbacks
 
@@ -162,6 +162,9 @@ local function onbuilt(inst)
 	inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds") 
 	-- inst.AnimState:PlayAnimation("place")
 	-- inst.AnimState:PushAnimation("idle_empty")
+
+	-- is called only on built
+	inst.Transform:SetRotation(45)
 end
 
 local function makeburnable(inst)   
@@ -176,7 +179,7 @@ local function makeburnable(inst)
 		end
 			
 		inst:DoTaskInTime(0.5, changes)
-		for _ = 0, inst.components.composter.poopamount+1, 1 do
+		for _ = 0, inst.components.composter.poopamount + 1, 1 do
 			inst.components.lootdropper:SpawnLootPrefab("ash")	
 		end
 
@@ -250,6 +253,7 @@ local function makecontainer(inst)
 		end
 	end
 	
+	-- "can 'Fill' be clicked?"
 	function compostpileparams.widget.buttoninfo.validfn(inst)
 		local num = 0
 		for k,v in pairs (inst.components.container.slots) do
@@ -257,9 +261,7 @@ local function makecontainer(inst)
 		end
 
 		return inst.replica.container ~= nil and num > 2
-		-- return inst.replica.container ~= nil and inst.replica.container:IsFull()
 	end
-
 
 	inst:AddComponent("container")
 	inst.components.container:WidgetSetup("compostpile", compostpileparams)
@@ -271,32 +273,29 @@ local function makecomposter(inst)
 
 	local function startcompostfn(inst)
 		if not inst:HasTag("burnt") then
-			inst.AnimState:PlayAnimation("idle_full")
+			inst.AnimState:PlayAnimation("idle_empty")
 
 			removeflies(inst)
 			-- inst:RemoveComponent("burnable")
-			-- inst:RemoveComponent("propagator")
 		end
 	end
 
 	local function donecompostfn(inst)
 		if not inst:HasTag("burnt") then
 			inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds")
-		-- addflies(inst)
-		-- makeburnable(inst)		
+			addflies(inst)
 		end
 	end
 
 	local function continuedonefn(inst)
 		addflies(inst)
-		inst.AnimState:PlayAnimation("idle_full")
-		-- makeburnable(inst)
+		inst.AnimState:PlayAnimation("idle_empty")
 	end
 
 	local function continuecompostfn(inst)
 		if not inst:HasTag("burnt") then
-			-- removeflies(inst)
-			inst.AnimState:PlayAnimation("idle_full")
+			removeflies(inst)
+			inst.AnimState:PlayAnimation("idle_empty")
 		end
 	end
 
@@ -306,6 +305,7 @@ local function makecomposter(inst)
 			inst.AnimState:PlayAnimation("idle_empty")
 			-- removeflies(inst)		
 		end
+		removeflies(inst)
 	end
 
     inst:AddComponent("composter")
@@ -323,12 +323,16 @@ end
 local function fn()
 	
 	local function onsave(inst, data)
+		print("onsave...")
+		print(data.burnt)
 		if inst:HasTag("burnt") or (inst.components.burnable ~= nil and inst.components.burnable:IsBurning()) then
 			data.burnt = true
 		end
 	end
 	
 	local function onload(inst, data)
+		print("onload...")
+		print(data.burnt)
 		if data ~= nil and data.burnt then
 			inst.components.burnable.onburnt(inst)
 		end
@@ -340,10 +344,18 @@ local function fn()
 		end
 
 		if inst.components.composter.composting then
+			if inst.components.composter.rotamount > 0 then
+				return "COMPOSTING_MEAT"
+			end
+
+			if inst.components.composter.poopamount + inst.components.composter.rottyness >= TUNING.COMPOSTPILE_FERTILESOIL_THRES then
+				return "COMPOSTING_FERTILE"
+			end
+
 			if inst.components.composter.done then
 				return "DONE"
 			else 
-				if inst.components.composter:GetTimeToCompost() > TUNING.TOTAL_DAY_TIME * 3 then
+				if inst.components.composter:GetTimeToCompost() >= TUNING.TOTAL_DAY_TIME * 2 then
 					return "COMPOSTING_LONG"
 				else
 					return "COMPOSTING_SHORT"
@@ -374,7 +386,8 @@ local function fn()
 	
 	inst.MiniMapEntity:SetIcon("farm2.png")
 
-	-- inst.Transform:SetRotation(45)
+	-- is called only on server load, not on built (see above!)
+	inst.Transform:SetRotation(45)
 	
 	inst._burnt = net_bool(inst.GUID, "compostpile._burnt", "burntdirty")
 

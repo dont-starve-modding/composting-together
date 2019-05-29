@@ -9,67 +9,60 @@ function AddCompostingRecipe(composter, recipe)
 end
 
 local compostables = {}
-function AddCompostablesValues(names, tags, cancook)
+function AddCompostablesValues(names, tags)
 	for _,name in pairs(names) do
 		compostables[name] = { tags= {}}
-
-		if cancook then
-			compostables[name.."_cooked"] = {tags={}}
-		end
 
 		for tagname,tagval in pairs(tags) do
 			compostables[name].tags[tagname] = tagval
 			--print(name,tagname,tagval,ingtable[name].tags[tagname])
-
-			if cancook then
-				compostables[name.."_cooked"].tags.precook = 1
-				compostables[name.."_cooked"].tags[tagname] = tagval
-			end
 		end
 	end
 end
 
 
-local fruits = {"pomegranate", "dragonfruit", "cave_banana", "watermelon"}
-AddCompostablesValues(fruits, {fruit=1}, true)
+local fruits = {"pomegranate", "dragonfruit", "cave_banana", "watermelon", "berries"}
+AddCompostablesValues(fruits, {fruit=1})
 
-AddCompostablesValues({"berries"}, {fruit=.5}, true)
-AddCompostablesValues({"durian"}, {fruit=1, monster=1}, true)
+AddCompostablesValues({"durian"}, {fruit=1, monster=1})
 
--- AddCompostablesValues({"honey", "honeycomb"}, {sweetener=1}, true)
+-- AddCompostablesValues({"honey", "honeycomb"}, {sweetener=1})
 
 local veggies = {"carrot", "corn", "pumpkin", "eggplant", "cutlichen", "cactus_meat", "cactus_flower"}
-AddCompostablesValues(veggies, {veggie=1}, true)
+AddCompostablesValues(veggies, {veggie=1})
 
 local mushrooms = {"red_cap", "green_cap", "blue_cap"}
-AddCompostablesValues(mushrooms, {veggie=.5}, true)
+AddCompostablesValues(mushrooms, {veggie=1})
 
--- AddCompostablesValues({"meat"}, {meat=1}, true, true)
--- AddCompostablesValues({"monstermeat"}, {meat=1, monster=1}, true, true)
--- AddCompostablesValues({"froglegs", "drumstick"}, {meat=.5}, true)
--- AddCompostablesValues({"smallmeat"}, {meat=.5}, true, true)
+AddCompostablesValues({"meat"}, {meat=1})
+AddCompostablesValues({"monstermeat"}, {meat=1, monster=1})
+AddCompostablesValues({"froglegs", "drumstick"}, {meat=.5})
+AddCompostablesValues({"smallmeat"}, {meat=.5})
 
--- AddCompostablesValues({"fish", "eel"}, {meat=.5,fish=1}, true)
+AddCompostablesValues({"fish", "eel"}, {meat=.5,fish=1})
 
-AddCompostablesValues({"mandrake"}, {veggie=1, enlighted=4}, true)
-AddCompostablesValues({"egg"}, {egg=1}, true)
-AddCompostablesValues({"tallbirdegg"}, {egg=2}, true)
-AddCompostablesValues({"bird_egg"}, {egg=1}, true)
-AddCompostablesValues({"butterflywings"}, {misc=.5, enlighted=1}, false)
-AddCompostablesValues({"twigs", "pinecone"}, {misc=.25}, false)
-AddCompostablesValues({"seeds"}, {misc=.25}, false)
-AddCompostablesValues({"cutgrass"}, {misc=.5}, false)
-AddCompostablesValues({"spoiled_food"}, {misc=.5}, false)
-AddCompostablesValues({"petals"}, {misc=.5, enlighted=.5}, false)
-AddCompostablesValues({"petals_evil"}, {misc=.5}, false)
+AddCompostablesValues({"mandrake"}, {veggie=1, enlighted=4})
+AddCompostablesValues({"egg"}, {egg=1})
+AddCompostablesValues({"tallbirdegg"}, {egg=2})
+AddCompostablesValues({"bird_egg"}, {egg=1})
+AddCompostablesValues({"butterflywings"}, {misc=.5, enlighted=1})
+AddCompostablesValues({"twigs", "pinecone"}, {misc=.25})
+AddCompostablesValues({"seeds"}, {misc=.25})
+AddCompostablesValues({"cutgrass"}, {misc=.5})
+AddCompostablesValues({"spoiled_food"}, {misc=.5})
+AddCompostablesValues({"petals"}, {misc=.5, enlighted=.5})
+AddCompostablesValues({"petals_evil"}, {misc=.5, enlighted=.5})
 
 local veggie_meals = {"butterflymuffin", "dragonpie", "jammypreserves", "fruitmedley", "mandrakesoup", "powcake", "pumpkincookie", "ratatouille",
- "stuffedeggplant", "taffy", "unagi", "waffles", "wetgoop"}
-AddCompostablesValues(veggie_meals, {veggie=1.5}, false)
+	"stuffedeggplant", "taffy", "unagi", "waffles"}
+AddCompostablesValues(veggie_meals, {veggie=1.5})
 
 local meat_meals = {"baconeggs", "fishtacos", "fishsticks", "frogglebunwich", "honeyham", "honeynuggets", "kabobs", "meatballs", "bonestew", "monsterlasagna", 
-"perogies", "turkeydinner"}
-AddCompostablesValues(meat_meals, {misc=1.00}, false)
+	"perogies", "turkeydinner"}
+AddCompostablesValues(meat_meals, {meat=1})
+
+local goop = { "wetgoop" }
+AddCompostablesValues(goop, {misc=0.5})
 
 local smallcompost = {
 	name = "smallcompost",
@@ -79,6 +72,7 @@ local smallcompost = {
 	priority = 0,
 	weight = 1,
 	amount = TUNING.COMPOSTPILE_SMALLCOMPOST_POOPAMOUNT,
+	rotamount = 0,
 	composttime = TUNING.COMPOSTPILE_SMALLCOMPOST_TIME,   -- quite long
 	fireflyspawn = TUNING.COMPOSTPILE_FIREFLYSPAWN_PERCENT_LOW,
 }
@@ -86,11 +80,12 @@ local smallcompost = {
 local medcompost = {
 	name = "medcompost",
 	test = function(composter, names, tags)
-		return ((tags.misc or 0) + (tags.egg or 0) + (tags.veggie or 0) + (tags.fruit or 0) > 3.0) 
+		return ((tags.misc or 0) + (tags.egg or 0) + (tags.veggie or 0) + (tags.fruit or 0) >= 3.0) 
 	end,
 	priority = 1,
 	weight = 1,
 	amount = TUNING.COMPOSTPILE_MEDCOMPOST_POOPAMOUNT,
+	rotamount = 0,
 	composttime = TUNING.COMPOSTPILE_MEDCOMPOST_TIME,   -- shorter
 	fireflyspawn = TUNING.COMPOSTPILE_FIREFLYSPAWN_PERCENT_LOW,
 }
@@ -98,31 +93,46 @@ local medcompost = {
 local largecompost = {
 	name = "largecompost",
 	test = function(composter, names, tags) 
-		return ((tags.misc or 0) + (tags.egg or 0) + (tags.veggie or 0) + (tags.fruit or 0) > 5.0) 
+		return ((tags.misc or 0) + (tags.egg or 0) + (tags.veggie or 0) + (tags.fruit or 0) >= 5.0) 
 	end,
 	priority = 2,
 	weight = 1,
 	amount = TUNING.COMPOSTPILE_LARGECOMPOST_POOPAMOUNT,
+	rotamount = 0,
 	composttime = TUNING.COMPOSTPILE_LARGECOMPOST_TIME,   -- shorter
 	fireflyspawn = TUNING.COMPOSTPILE_FIREFLYSPAWN_PERCENT_LOW,
 }
 
 local enlightedcompost = {
 	name = "enlightedcompost",
-	test = function(composter, names, tags) 
-		return (tags.enlighted or 0 >= 3.0) 
+	test = function(composter, names, tags)
+		return (tags.enlighted or 0 >= 2.5) 
 	end,
 	priority = 3,
 	weight = 3,
-	amount = TUNING.COMPOSTPILE_MEDCOMPOST_POOPAMOUNT,
+	amount = TUNING.COMPOSTPILE_SMALLCOMPOST_POOPAMOUNT,
+	rotamount = 0,
 	composttime = TUNING.COMPOSTPILE_ENLIGHTEDCOMPOST_TIME,   -- very long
 	fireflyspawn = TUNING.COMPOSTPILE_FIREFLYSPAWN_PERCENT_HIGH,
 }
 
-AddCompostingRecipe("compostpile",smallcompost)
-AddCompostingRecipe("compostpile",medcompost)
-AddCompostingRecipe("compostpile",largecompost)
-AddCompostingRecipe("compostpile",enlightedcompost)
+local meatcompost = {
+	name = "meatcompost",
+	test = function(composter, names, tags) 
+		return ((tags.meat or 0) > 0.0) 
+	end,
+	priority = 4,
+	weight = 3,
+	amount = 0,
+	rotamount = TUNING.COMPOSTPILE_LARGECOMPOST_POOPAMOUNT,
+	composttime = TUNING.COMPOSTPILE_SMALLCOMPOST_TIME,   -- shorter
+	fireflyspawn = 0,
+}
+
+AddCompostingRecipe("compostpile", smallcompost)
+AddCompostingRecipe("compostpile", medcompost)
+AddCompostingRecipe("compostpile", largecompost)
+AddCompostingRecipe("compostpile", enlightedcompost)
 
 local aliases =
 {
@@ -156,9 +166,7 @@ local function GetCompostableValues(prefablist)
 		local data = GetCompostableData(name)
 
 		if data then
-
 			for kk, vv in pairs(data.tags) do
-
 				tags[kk] = tags[kk] and tags[kk] + vv or vv
 			end
 		end
@@ -182,8 +190,12 @@ local function GetCandidateRecipes(composter, ingdata)
 		end
 	end
 
-	table.sort( candidates, function(a,b) return (a.priority or 0) > (b.priority or 0) end )
-	print(#candidates)
+	table.sort(candidates, 
+		function(a,b) 
+			return (a.priority or 0) > (b.priority or 0) end 
+	)
+
+	print('possible recipe candidates:'..#candidates)
 	if #candidates > 0 then
 		--find the set of highest priority recipes
 		local top_candidates = {}
@@ -205,10 +217,12 @@ end
 
 
 local function CalculateRecipe(composter, names)
-	local ingdata = GetCompostableValues(names)
+	local ingdata = GetCompostableValues(names)	
 	local candidates = GetCandidateRecipes(composter, ingdata)
 
-	table.sort( candidates, function(a,b) return (a.weight or 1) > (b.weight or 1) end )
+	table.sort(candidates, 
+		function(a,b) return (a.weight or 1) > (b.weight or 1) end
+	)
 	local total = 0
 	for k,v in pairs(candidates) do
 		total = total + (v.weight or 1)
@@ -219,7 +233,11 @@ local function CalculateRecipe(composter, names)
 	while idx <= #candidates do
 		val = val - candidates[idx].weight
 		if val <= 0 then
-			return candidates[idx].amount, candidates[idx].composttime or 1, candidates[idx].fireflyspawn  -- or 1?
+			print("chose recipe", candidates[idx].name)
+			return candidates[idx].amount,
+			 candidates[idx].rotamount, 
+			 candidates[idx].composttime or 1, 
+			 candidates[idx].fireflyspawn  -- or 1?
 		end
 
 		idx = idx+1

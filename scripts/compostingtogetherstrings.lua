@@ -4,7 +4,7 @@ NEWSTRINGS = {
 	},
 
 	RECIPE_DESC = {
-		COMPOSTPILE = "Stinks, grows and does not look very fancy.",
+		COMPOSTPILE = "Stinks, grows and does not look fancy.",
 	},
 
 	CHARACTERS = {
@@ -14,6 +14,8 @@ NEWSTRINGS = {
 					EMPTY = "Stinky..",
 					COMPOSTING_LONG = "This may take a while.",
 					COMPOSTING_SHORT = "You can watch it rot.",
+					COMPOSTING_FERTILE = "This looks promising!",
+					COMPOSTING_MEAT = "I guess this won't work well...",
 					DONE = "Much rot. WOW",
 					BURNT = "P-oops..."
 				}
