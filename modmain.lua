@@ -2,6 +2,11 @@ PrefabFiles = {
     "compostpile",
 }
 
+Assets = {
+	Asset("IMAGE", "images/inventoryimages/compostpile.tex"),
+	Asset("ATLAS", "images/inventoryimages/compostpile.xml"),
+}
+
 STRINGS = GLOBAL.STRINGS
 
 function TableMerge(t1, t2)
@@ -23,15 +28,31 @@ NEWSTRINGS = GLOBAL.require("compostingtogetherstrings")
 GLOBAL.STRINGS = TableMerge(GLOBAL.STRINGS, NEWSTRINGS)
 
 -- Compost Pile Recipe
-local compostpile = GLOBAL.Recipe("compostpile", {
-    GLOBAL.Ingredient("rocks", 6),
-    GLOBAL.Ingredient("poop", 3),
-    GLOBAL.Ingredient("log", 4)}, 
+-- local compostpile = GLOBAL.Recipe("compostpile", 
+--     {
+--         GLOBAL.Ingredient("rocks", 6),
+--         GLOBAL.Ingredient("poop", 3),
+--         GLOBAL.Ingredient("log", 4)
+--     }, 
+--     GLOBAL.RECIPETABS.FARM,  
+--     GLOBAL.TECH.SCIENCE_ONE, 
+--     "compostpile_placer"
+-- )
+
+local recipe = AddRecipe("compostpile", {
+        GLOBAL.Ingredient("rocks", 6),
+        GLOBAL.Ingredient("poop", 3),
+        GLOBAL.Ingredient("log", 4)
+    },     
     GLOBAL.RECIPETABS.FARM,  
-    GLOBAL.TECH.SCIENCE_ONE, 
-    "compostpile_placer"
+    GLOBAL.TECH.SCIENCE_ONE
+    ,"compostpile_placer"
+    -- , nil, nil, nil, nil, 
+    -- "images/inventoryimages/compostpile.xml", "compostpile.tex"
 )
-compostpile.atlas = "images/inventoryimages/compostpile.xml"
+recipe.atlas = "images/inventoryimages/compostpile.xml"
+
+-- compostpile.atlas = "images/inventoryimages/compostpile.xml"
 
 -- Add harvesting action to compost pile
 local fn = GLOBAL.ACTIONS.HARVEST.fn

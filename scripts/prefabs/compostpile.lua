@@ -374,7 +374,7 @@ local function fn()
 	
 	inst.MiniMapEntity:SetIcon("farm2.png")
 
-	inst.Transform:SetRotation(45)
+	-- inst.Transform:SetRotation(45)
 	
 	inst._burnt = net_bool(inst.GUID, "compostpile._burnt", "burntdirty")
 
@@ -441,5 +441,5 @@ local function fn()
     return inst
 end
 
-return Prefab("compostpile", fn, assets, prefabs),
-    MakePlacer("compostpile_placer", "compostpile", "compostpile", "idle_empty")
+return Prefab("common/compostpile", fn, assets, prefabs),
+    MakePlacer("common/compostpile_placer", "compostpile", "compostpile", "idle_empty")
