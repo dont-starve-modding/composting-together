@@ -112,7 +112,7 @@ local function onhammered(inst, worker)
 	end
 	inst.components.lootdropper:DropLoot()
 	SpawnPrefab("collapse_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
-	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_metal")
+	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
 	inst:Remove()
 end
 
@@ -129,13 +129,11 @@ local slotpos = {
 
 -- add some fancy flies flying around the dirty mess
 local function addflies(inst)
-	print("addflies")
 	inst.flies = inst:SpawnChild("flies")
 end
 
 -- hooosh hoosh
 local function removeflies(inst)
-	print("removeflies")
 	if(inst.flies) then
 		inst.flies:Remove()
 		inst.flies = nil
