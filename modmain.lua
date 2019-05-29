@@ -77,9 +77,6 @@ AddComponentAction("SCENE", "composter", function(inst, doer, actions, right)
         elseif right and
             -- (
             inst:HasTag("readytocompost")
-            -- or (inst.replica.container ~= nil and
-            --     inst.replica.container:IsFull() and
-            --     inst.replica.container:IsOpenedBy(doer))) 
                 then
             table.insert(actions, GLOBAL.ACTIONS.COMPOST)
         end
