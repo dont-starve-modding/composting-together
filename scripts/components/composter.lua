@@ -1,5 +1,7 @@
 local composting = require("composting")
 
+-- Scene action callbacks
+
 local function ondone(inst, done)
 	if done then
 			inst:AddTag("donecomposting")
@@ -22,6 +24,8 @@ local function onnotready(inst)
 		inst:RemoveTag("readytocompost")
 	end
 end
+
+---------------------------
 
 local Composter = Class(function(self, inst)
 		self.inst = inst
@@ -133,7 +137,7 @@ function Composter:StartComposting(time)
 			local composttime = TUNING.TOTAL_DAY_TIME*5
 			self.poopamount, composttime, self.spawnfireflies = composting.CalculateRecipe(self.inst.prefab, compostables)
 						
-			-- lower the composting time by given spoilage grade spoilage total average spoilage of 50% lowers compost time by 25% (avg 20% -> 40%)
+			-- lower the composting time by given spoilage grade. spoilage total average spoilage of 50% lowers compost time by 25% (avg 20% -> 40%)
 			-- maximum lowering-grade is 50% here
 			if(spoilage_n > 0) then
 				composttime = (composttime * (0.5 + (spoilage_total / (2*spoilage_n))))
@@ -153,25 +157,15 @@ function Composter:StartComposting(time)
 			
 			--all together composttime lowering-grade is 55%
 			
-			-- when putting a huge amount of big fruits and veggies on the pile + given spoilage, the pile becomes extra fertile s.a.
+			-- when putting a huge amount of big fruits and veggies on the pile + given spoilage, the pile becomes extra fertile
 			if(self.poopamount + self.rottyness >= TUNING.COMPOSTPILE_FERTILESOIL_THRES) then
 				self.fertilesoil = true
 				GetPlayer().components.talker:Say("What a mess!")
 			end
-			
-			-- local grow_time = TUNING.BASE_COOK_TIME * composttime
-			-- self.targettime = GetTime() + grow_time
-			-- self.task = self.inst:DoTaskInTime(grow_time, docompost, "cook")
-
-			-- local grow_time = TUNING.BASE_COMPOST_TIME * composttime
-			-- if time then
-			-- 	composttime = time
-			-- end
 
 			print("receive", self.poopamount, "poop");
 			print("firefly spawn rate (%):", self.spawnfireflies);
 			print("composting time in days: ", composttime/TUNING.TOTAL_DAY_TIME);
-			-- self:StartTask(composttime)
 
 			self.targettime = GetTime() + composttime
 			if self.task ~= nil then
@@ -212,19 +206,6 @@ end
 -- 	self.done = nil
 -- end
 
--- garbage:
--- function Composter:StartTask(time)
--- 	print("start Task")
--- 	if not self.inst:IsAsleep() then
--- 		if self.task then
--- 			self.task:Cancel()
--- 			self.task = nil
--- 		end
--- 		self.targettime = GetTime() + time
--- 		self.task = self.inst:DoTaskInTime(time, docompost, "cook")
--- 	end
--- end
-
 
 function Composter:OnSave()
 	return {
@@ -255,8 +236,8 @@ function Composter:OnLoad(data)
 
 		if data.remainingtime ~= nil then
 			self.targettime = GetTime() + math.max(0, data.remainingtime)
-			print("remainingtime " .. data.remainingtime)
-			print("targettime ".. self.targettime)
+			print("remainingtime " ..data.remainingtime)
+			print("targettime "..self.targettime)
 
 			if self.done then
 				if self.oncontinuedone ~= nil then
@@ -294,7 +275,7 @@ function Composter:GetDebugString()
 	end
 	
 	if self.product then
-		str = str.. " ".. self.product
+		str = str.." ".. self.product
 	end
     
 	return str
@@ -308,7 +289,7 @@ function Composter:Harvest(harvester)
 
 		self.done = nil
 		local loot = SpawnPrefab("poop")
-		loot.components.stackable:SetStackSize(self.rottyness + self.poopamount)
+		loot.components.stackable:SetStackSize(self.poopamount + self.rottyness)
 	
 		if harvester ~= nil and harvester.components.inventory ~= nil then
 			harvester.components.inventory:GiveItem(loot, nil, self.inst:GetPosition())
