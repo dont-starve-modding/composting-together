@@ -28,16 +28,6 @@ NEWSTRINGS = GLOBAL.require("compostingtogetherstrings")
 GLOBAL.STRINGS = TableMerge(GLOBAL.STRINGS, NEWSTRINGS)
 
 -- Compost Pile Recipe
--- local compostpile = GLOBAL.Recipe("compostpile", 
---     {
---         GLOBAL.Ingredient("rocks", 6),
---         GLOBAL.Ingredient("poop", 3),
---         GLOBAL.Ingredient("log", 4)
---     }, 
---     GLOBAL.RECIPETABS.FARM,  
---     GLOBAL.TECH.SCIENCE_ONE, 
---     "compostpile_placer"
--- )
 
 local recipe = AddRecipe("compostpile", {
         GLOBAL.Ingredient("rocks", 6),
@@ -45,14 +35,10 @@ local recipe = AddRecipe("compostpile", {
         GLOBAL.Ingredient("log", 4)
     },     
     GLOBAL.RECIPETABS.FARM,  
-    GLOBAL.TECH.SCIENCE_ONE
-    ,"compostpile_placer"
-    -- , nil, nil, nil, nil, 
-    -- "images/inventoryimages/compostpile.xml", "compostpile.tex"
+    GLOBAL.TECH.SCIENCE_ONE,
+    "compostpile_placer"
 )
 recipe.atlas = "images/inventoryimages/compostpile.xml"
-
--- compostpile.atlas = "images/inventoryimages/compostpile.xml"
 
 -- Add harvesting action to compost pile
 local fn = GLOBAL.ACTIONS.HARVEST.fn

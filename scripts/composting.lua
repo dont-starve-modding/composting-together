@@ -147,11 +147,6 @@ local function GetCompostableData(prefabname)
 end
 
 
--- local foods = require("preparedfoods")
--- for k,recipe in pairs (foods) do
-	-- AddCookerRecipe("cookpot", recipe)
--- end
-
 local function GetCompostableValues(prefablist)
 	local prefabs = {}
 	local tags = {}

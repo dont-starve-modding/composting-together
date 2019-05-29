@@ -300,15 +300,6 @@ function Composter:GetDebugString()
 	return str
 end
 
--- not used in DST anymore
--- function Composter:CollectSceneActions(doer, actions, right)
---     if self.done then
--- 			table.insert(actions, ACTIONS.HARVEST)
---     elseif right and self:CanCompost() then
--- 			table.insert(actions, ACTIONS.COMPOST)
---     end
--- end
-
 function Composter:Harvest(harvester)
 	if self.done then
 		if self.onharvest then
