@@ -206,15 +206,6 @@ end
 
 
 function Composter:OnSave()
-	print("saving...")
-	print(self.remainingtime)
-	print(self.composting)
-	print(self.done)
-	print(self.fertilesoil)
-	print(self.poopamount)
-	print(self.rotamount)
-	print(self.rottyness)
-	print(self.spawnfireflies)
 	return {
 		remainingtime = self.targettime ~= nil and self.targettime - GetTime() or 0,
 		composting = self.composting,
@@ -229,16 +220,6 @@ function Composter:OnSave()
 end
 
 function Composter:OnLoad(data)
-	print("loading...")
-	print(data.remainingtime)
-	print(data.composting)
-	print(data.done)
-	print(data.fertilesoil)
-	print(data.poopamount)
-	print(data.rotamount)
-	print(data.rottyness)
-	print(data.spawnfireflies)
-
 	self.fertilesoil = data.fertilesoil
 	self.composting = data.composting or nil
 	self.done = data.done or nil
@@ -252,6 +233,10 @@ function Composter:OnLoad(data)
 			self.task = nil
 	end
 	self.targettime = nil
+
+	if not self.done and not self.composting then
+		self.done = false
+	end
 
 	if data.remainingtime ~= nil then
 		self.targettime = GetTime() + math.max(0, data.remainingtime)
