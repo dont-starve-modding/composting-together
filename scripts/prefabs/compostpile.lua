@@ -281,13 +281,14 @@ local function makecomposter(inst)
 	local function donecompostfn(inst)
 		if not inst:HasTag("burnt") then
 			inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds")
+			inst.AnimState:PlayAnimation("idle_full")
 			addflies(inst)
 		end
 	end
 
 	local function continuedonefn(inst)
+		inst.AnimState:PlayAnimation("idle_full")
 		addflies(inst)
-		inst.AnimState:PlayAnimation("idle_empty")
 	end
 
 	local function continuecompostfn(inst)
@@ -453,4 +454,4 @@ local function fn()
 end
 
 return Prefab("common/compostpile", fn, assets, prefabs),
-    MakePlacer("common/compostpile_placer", "compostpile", "compostpile", "idle_empty")
+    MakePlacer("common/compostpile_placer", "compostpile", "compostpile", "idle_full")
