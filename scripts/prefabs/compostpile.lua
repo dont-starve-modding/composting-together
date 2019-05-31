@@ -351,16 +351,17 @@ local function fn()
 				return "COMPOSTING_FERTILE"
 			end
 
-			if inst.components.composter.done then
-				return "DONE"
-			else 
-				if inst.components.composter:GetTimeToCompost() >= TUNING.TOTAL_DAY_TIME * 2 then
-					return "COMPOSTING_LONG"
-				else
-					return "COMPOSTING_SHORT"
-				end
+			if inst.components.composter:GetTimeToCompost() >= TUNING.TOTAL_DAY_TIME * 2 then
+				return "COMPOSTING_LONG"
+			else
+				return "COMPOSTING_SHORT"
 			end
 		end
+
+		if inst.components.composter.done then
+			return "DONE"
+		end
+		
 		return "EMPTY"
 	end
 
