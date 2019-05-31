@@ -1,7 +1,7 @@
 # Composting Together
 Don't Starve Together mod which turns your garbage into valuable shitloads of shit a.k.a. manure!
 
-    Warning: This mod is not yet completely tested; please keep in mind, that it might crash on use.
+    Warning: This mod is not yet completely tested. Please keep in mind, that it might crash on use.
 
     Please test this mod and send messages, if you find any bug!
 
