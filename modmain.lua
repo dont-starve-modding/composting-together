@@ -58,7 +58,7 @@ recipe.atlas = "images/inventoryimages/compostpile.xml"
 -- Add harvesting action to compost pile
 local fn = GLOBAL.ACTIONS.HARVEST.fn
 GLOBAL.ACTIONS.HARVEST.fn = function(act)
-	if(act.target.components.composter) then
+	if act.target.components.composter then
 		act.target.components.composter:Harvest(act.doer)
 		return true
 	else
@@ -89,10 +89,7 @@ AddComponentAction("SCENE", "composter", function(inst, doer, actions, right)
         not (doer.replica.rider ~= nil and doer.replica.rider:IsRiding()) then
         if inst:HasTag("donecomposting") then
             table.insert(actions, GLOBAL.ACTIONS.HARVEST)
-        elseif right and
-            -- (
-            inst:HasTag("readytocompost")
-                then
+        elseif right and inst:HasTag("readytocompost") then
             table.insert(actions, GLOBAL.ACTIONS.COMPOST)
         end
     end
