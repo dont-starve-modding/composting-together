@@ -3,10 +3,12 @@
 echo "removing artifacts..."
 rm -r build/
 
+echo "creating directories..."
 mkdir -p build/scripts
 mkdir -p build/images/inventoryimages
 mkdir -p build/anim
 
+echo "compiling animations..."
 "C:\Program Files (x86)\Steam\steamapps\common\Don't Starve Mod Tools\mod_tools\scml.exe" compostpile.scml .
 
 echo "copying files and scripts..."
