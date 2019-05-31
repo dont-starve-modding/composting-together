@@ -11,24 +11,24 @@
         <animation id="0" name="idle_empty_90s" length="1000">
             <mainline>
                 <key id="0">
-                    <object_ref id="0" name="compost-1" folder="1" file="0" abs_x="0" abs_y="1" abs_pivot_x="0.5" abs_pivot_y="0.5" abs_angle="0" abs_scale_x="5.461538" abs_scale_y="5.461538" abs_a="1" timeline="0" key="0" z_index="0"/>
+                    <object_ref id="0" name="compost-1" folder="1" file="0" abs_x="0" abs_y="1" abs_pivot_x="0.5" abs_pivot_y="0.5" abs_angle="0" abs_scale_x="5.30303" abs_scale_y="5.30303" abs_a="1" timeline="0" key="0" z_index="0"/>
                 </key>
             </mainline>
             <timeline id="0" name="compost-1">
                 <key id="0" spin="0">
-                    <object folder="1" file="0" y="1" angle="0" scale_x="5.461538" scale_y="5.461538"/>
+                    <object folder="1" file="0" y="1" angle="0" scale_x="5.30303" scale_y="5.30303"/>
                 </key>
             </timeline>
         </animation>
         <animation id="1" name="idle_full_90s" length="1000">
             <mainline>
                 <key id="0">
-                    <object_ref id="0" name="compost-0" folder="1" file="1" abs_x="0.5" abs_y="1.5" abs_pivot_x="0.5" abs_pivot_y="0.5" abs_angle="0" abs_scale_x="3.633333" abs_scale_y="3.633333" abs_a="1" timeline="0" key="0" z_index="0"/>
+                    <object_ref id="0" name="compost-0" folder="1" file="1" abs_x="0.5" abs_y="1.5" abs_pivot_x="0.5" abs_pivot_y="0.5" abs_angle="0" abs_scale_x="3.508485" abs_scale_y="3.508485" abs_a="1" timeline="0" key="0" z_index="0"/>
                 </key>
             </mainline>
             <timeline id="0" name="compost-0">
                 <key id="0" spin="0">
-                    <object folder="1" file="1" x="0.5" y="1.5" angle="0" scale_x="3.633333" scale_y="3.633333"/>
+                    <object folder="1" file="1" x="0.5" y="1.5" angle="0" scale_x="3.508485" scale_y="3.508485"/>
                 </key>
             </timeline>
         </animation>
