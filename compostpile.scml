@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spriter_data scml_version="1.0" generator="BrashMonkey Spriter" generator_version="b5">
+    <folder id="0" name="images/inventoryimages">
+        <file id="0" name="images/inventoryimages/compostpile.png" width="62" height="64" pivot_x="0" pivot_y="1"/>
+    </folder>
+    <folder id="1" name="anim/compost">
+        <file id="0" name="anim/compost/compost-1.png" width="77" height="52" pivot_x="0.5" pivot_y="0.5"/>
+        <file id="1" name="anim/compost/compost-0.png" width="149" height="159" pivot_x="0.5" pivot_y="0.5"/>
+    </folder>
+    <entity id="0" name="compostpile">
+        <animation id="0" name="idle_empty_90s" length="1000">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" name="compost-1" folder="1" file="0" abs_x="0" abs_y="1" abs_pivot_x="0.5" abs_pivot_y="0.5" abs_angle="0" abs_scale_x="5.461538" abs_scale_y="5.461538" abs_a="1" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="compost-1">
+                <key id="0" spin="0">
+                    <object folder="1" file="0" y="1" angle="0" scale_x="5.461538" scale_y="5.461538"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="1" name="idle_full_90s" length="1000">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" name="compost-0" folder="1" file="1" abs_x="0.5" abs_y="1.5" abs_pivot_x="0.5" abs_pivot_y="0.5" abs_angle="0" abs_scale_x="3.633333" abs_scale_y="3.633333" abs_a="1" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="compost-0">
+                <key id="0" spin="0">
+                    <object folder="1" file="1" x="0.5" y="1.5" angle="0" scale_x="3.633333" scale_y="3.633333"/>
+                </key>
+            </timeline>
+        </animation>
+    </entity>
+</spriter_data>
