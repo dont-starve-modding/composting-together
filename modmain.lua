@@ -45,9 +45,9 @@ if (GetModConfigData("poop_amount") == "high") then
 end
 
 local recipe = AddRecipe("compostpile", {
-        GLOBAL.Ingredient("rocks", COMPOSTPILE_COST_ROCKS),
-        GLOBAL.Ingredient("log", COMPOSTPILE_COST_LOG),
-        GLOBAL.Ingredient("poop", COMPOSTPILE_COST_POOP)
+        GLOBAL.Ingredient("rocks", TUNING.COMPOSTPILE_COST_ROCKS),
+        GLOBAL.Ingredient("log", TUNING.COMPOSTPILE_COST_LOG),
+        GLOBAL.Ingredient("poop", TUNING.COMPOSTPILE_COST_POOP)
     },     
     GLOBAL.RECIPETABS.FARM,  
     GLOBAL.TECH.SCIENCE_ONE,
