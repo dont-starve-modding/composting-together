@@ -2,8 +2,8 @@ local composting = require("composting")
 
 -- Scene action callbacks
 
-local function ondone(inst, done)
-	if done then
+local function updatetags(inst)
+	if inst.components.composter.done then
 		inst:AddTag("donecomposting")
 	else
 		inst:RemoveTag("donecomposting")
@@ -41,6 +41,8 @@ local Composter = Class(function(self, inst)
 	self.fertilesoil = false
 	self.spawnfireflies = 0
 
+	self.targettime = nil
+
 	inst:ListenForEvent("itemget", oncheckready)
     inst:ListenForEvent("onclose", oncheckready)
 
@@ -56,7 +58,6 @@ function Composter:OnRemoveFromEntity()
 end
 
 local function docompost(inst)
-	print("docompost")
 	inst.components.composter.task = nil
 	
 	if inst.components.composter.ondonecomposting then
@@ -66,7 +67,7 @@ local function docompost(inst)
 	inst.components.composter.done = true
 	inst.components.composter.composting = nil
 
-	ondone(inst, inst.components.composter.done)
+	updatetags(inst)
 end
 
 function Composter:GetTimeToCompost()
@@ -86,17 +87,17 @@ end
 
 function Composter:LongUpdate(dt)
 	if self:IsComposting() then
-			if self.task ~= nil then
-					self.task:Cancel()
-			end
-			if self.targettime - dt > GetTime() then
-					self.targettime = self.targettime - dt
-					self.task = self.inst:DoTaskInTime(self.targettime - GetTime(), docompost, self)
-					dt = 0            
-			else
-					dt = dt - self.targettime + GetTime()
-					docompost(self.inst, self)
-			end
+		if self.task ~= nil then
+			self.task:Cancel()
+		end
+		if self.targettime - dt > GetTime() then
+			self.targettime = self.targettime - dt
+			self.task = self.inst:DoTaskInTime(self.targettime - GetTime(), docompost, self)
+			dt = 0            
+		else
+			dt = dt - self.targettime + GetTime()
+			docompost(self.inst, self)
+		end
 	end
 end
 
@@ -158,12 +159,12 @@ function Composter:StartComposting(time)
 			-- when putting a huge amount of big fruits and veggies on the pile + given spoilage, the pile becomes extra fertile
 			if self.poopamount + self.rottyness >= TUNING.COMPOSTPILE_FERTILESOIL_THRES then
 				self.fertilesoil = true
-				GetPlayer().components.talker:Say("I can see some hard working worms!")
+				ThePlayer.components.talker:Say("I can see some hard working worms!")
 			end
 
-			print("receive", self.poopamount, "poop")
-			print("firefly spawn rate (%):", self.spawnfireflies)
-			print("composting time in days: ", composttime/TUNING.TOTAL_DAY_TIME)
+			-- print("receive", self.poopamount, "poop")
+			-- print("firefly spawn rate (%):", self.spawnfireflies)
+			-- print("composting time in days: ", composttime/TUNING.TOTAL_DAY_TIME)
 
 			self.targettime = GetTime() + composttime
 			if self.task ~= nil then
@@ -204,8 +205,7 @@ end
 
 
 function Composter:OnSave()
-	return {
-		remainingtime = self.targettime ~= nil and self.targettime - GetTime() or 0,
+	local data = {
 		composting = self.composting,
 		done = self.done,
 		
@@ -214,11 +214,10 @@ function Composter:OnSave()
 		rotamount = self.rotamount,
 		rottyness = self.rottyness,
 		spawnfireflies = self.spawnfireflies,
+		remainingtime = self.targettime ~= nil and self.targettime - GetTime() or 0,
+	
 	}
-end
-
-function Composter:OnLoad(data)
-	print("loading")
+	print("saving composter")
 	print(data.fertilesoil)
 	print(data.composting)
 	print(data.done)
@@ -226,6 +225,21 @@ function Composter:OnLoad(data)
 	print(data.rotamount)
 	print(data.rottyness)
 	print(data.spawnfireflies)
+	print(data.remainingtime)
+
+	return data
+end
+
+function Composter:OnLoad(data)
+	print("loading composter")
+	print(data.fertilesoil)
+	print(data.composting)
+	print(data.done)
+	print(data.poopamount)
+	print(data.rotamount)
+	print(data.rottyness)
+	print(data.spawnfireflies)
+	print(data.remainingtime)
 
 	self.fertilesoil = data.fertilesoil
 	self.composting = data.composting
@@ -241,32 +255,33 @@ function Composter:OnLoad(data)
 	end
 	self.targettime = nil
 
-	if data.remainingtime ~= nil then
-		self.targettime = GetTime() + math.max(0, data.remainingtime)
-		print("remainingtime " ..data.remainingtime)
-		print("targettime "..self.targettime)
+	updatetags(self.inst)
 
-		if self.done then
-			ondone(self.inst, self.inst.components.composter.done)
-			if self.oncontinuedone ~= nil then
-				self.oncontinuedone(self.inst)
-			end
-		else
-			self.task = self.inst:DoTaskInTime(data.remainingtime, docompost, self)
-			if self.oncontinuecomposting ~= nil then
-				self.oncontinuecomposting(self.inst)
-			end
-		end
-	else
-		ondone(self.inst, self.inst.components.composter.done)
+	if self.done then
 		if self.oncontinuedone ~= nil then
 			self.oncontinuedone(self.inst)
 		end
-	end
 
-	if self.inst.components.container ~= nil then
+		if self.inst.components.container ~= nil then
 			self.inst.components.container.canbeopened = false
+		end	
+	elseif self.composting then
+		self.targettime = GetTime() + math.max(0, data.remainingtime)
+
+		self.task = self.inst:DoTaskInTime(data.remainingtime, docompost, self)
+		if self.oncontinuecomposting ~= nil then
+			self.oncontinuecomposting(self.inst)
+		end
+
+		if self.inst.components.container ~= nil then
+			self.inst.components.container.canbeopened = false
+		end	
+	else
+		if self.inst.components.container ~= nil then
+			self.inst.components.container.canbeopened = true
+		end	
 	end
+	
 end
 
 function Composter:GetDebugString()
@@ -281,7 +296,7 @@ function Composter:GetDebugString()
 	end
 
 	if self.targettime then
-			str = str.." ("..tostring(self.targettime - GetTime())..")"
+		str = str.." ("..tostring(self.targettime - GetTime())..")"
 	end
     
 	return str
@@ -298,7 +313,6 @@ function Composter:Harvest(harvester)
 		local poop_stacksize = self.poopamount + self.rottyness
 		local rot_stacksize = self.rotamount
 
-		print("stack: "..poop_stacksize)
 		if poop_stacksize > 0 then
 			local loot = SpawnPrefab("poop")
 			loot.components.stackable:SetStackSize(poop_stacksize)
@@ -322,7 +336,7 @@ function Composter:Harvest(harvester)
 		if math.random() <= self.spawnfireflies then
 			local item_inst = SpawnPrefab("fireflies")
 			item_inst.entity:SetParent(self.inst.entity)
-			GetPlayer().components.talker:Say("I see bugs!")
+			ThePlayer.components.talker:Say("I see bugs!")
 		end
 
 		if self.task ~= nil then
@@ -336,12 +350,11 @@ function Composter:Harvest(harvester)
 		self.rottyness = 0
 		self.spawnfireflies = 0
 
-
 		if self.inst.components.container then		
 			self.inst.components.container.canbeopened = true
 		end
 
-		ondone(self.inst, self.inst.components.composter.done)
+		updatetags(self.inst)
 		
 		return true
 	end
