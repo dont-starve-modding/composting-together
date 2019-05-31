@@ -4,17 +4,17 @@ local composting = require("composting")
 
 local function ondone(inst, done)
 	if done then
-			inst:AddTag("donecomposting")
+		inst:AddTag("donecomposting")
 	else
-			inst:RemoveTag("donecomposting")
+		inst:RemoveTag("donecomposting")
 	end
 end
 
 local function oncheckready(inst)
 	if inst.components.container ~= nil and
-				not inst.components.container:IsOpen() and
-			inst.components.composter:CanCompost() then
-			inst:AddTag("readytocompost")
+			not inst.components.container:IsOpen() and
+		inst.components.composter:CanCompost() then
+		inst:AddTag("readytocompost")
 	end
 end
 
@@ -28,28 +28,26 @@ end
 ---------------------------
 
 local Composter = Class(function(self, inst)
-		self.inst = inst
-		
-		self.task = nil
+	self.inst = inst
 
-    self.composting = false
-    self.done = false
-    
-		self.poopamount = 0
-		self.rotamount = 0
-		self.rottyness = 0
-		self.fertilesoil = false
-		self.spawnfireflies = 0
-    self.recipes = nil
-		self.default_recipe = nil
+	self.task = nil
 
-		inst:ListenForEvent("itemget", oncheckready)
+	self.composting = false
+	self.done = false
+
+	self.poopamount = 0
+	self.rotamount = 0
+	self.rottyness = 0
+	self.fertilesoil = false
+	self.spawnfireflies = 0
+
+	inst:ListenForEvent("itemget", oncheckready)
     inst:ListenForEvent("onclose", oncheckready)
 
     inst:ListenForEvent("itemlose", onnotready)
     inst:ListenForEvent("onopen", onnotready)
 		
-		self.inst:AddTag("composter")
+	self.inst:AddTag("composter")
 end)
 
 function Composter:OnRemoveFromEntity()
@@ -163,9 +161,9 @@ function Composter:StartComposting(time)
 				GetPlayer().components.talker:Say("I can see some hard working worms!")
 			end
 
-			print("receive", self.poopamount, "poop");
-			print("firefly spawn rate (%):", self.spawnfireflies);
-			print("composting time in days: ", composttime/TUNING.TOTAL_DAY_TIME);
+			print("receive", self.poopamount, "poop")
+			print("firefly spawn rate (%):", self.spawnfireflies)
+			print("composting time in days: ", composttime/TUNING.TOTAL_DAY_TIME)
 
 			self.targettime = GetTime() + composttime
 			if self.task ~= nil then
@@ -220,23 +218,28 @@ function Composter:OnSave()
 end
 
 function Composter:OnLoad(data)
+	print("loading")
+	print(data.fertilesoil)
+	print(data.composting)
+	print(data.done)
+	print(data.poopamount)
+	print(data.rotamount)
+	print(data.rottyness)
+	print(data.spawnfireflies)
+
 	self.fertilesoil = data.fertilesoil
-	self.composting = data.composting or nil
-	self.done = data.done or nil
-	self.poopamount =data.poopamount;
-	self.rotamount = data.rotamount;
-	self.rottyness = data.rottyness;
-	self.spawnfireflies = data.spawnfireflies;
+	self.composting = data.composting
+	self.done = data.done
+	self.poopamount = data.poopamount
+	self.rotamount = data.rotamount
+	self.rottyness = data.rottyness
+	self.spawnfireflies = data.spawnfireflies
 
 	if self.task ~= nil then
-			self.task:Cancel()
-			self.task = nil
+		self.task:Cancel()
+		self.task = nil
 	end
 	self.targettime = nil
-
-	if not self.done and not self.composting then
-		self.done = false
-	end
 
 	if data.remainingtime ~= nil then
 		self.targettime = GetTime() + math.max(0, data.remainingtime)
@@ -244,17 +247,21 @@ function Composter:OnLoad(data)
 		print("targettime "..self.targettime)
 
 		if self.done then
+			ondone(self.inst, self.inst.components.composter.done)
 			if self.oncontinuedone ~= nil then
-					self.oncontinuedone(self.inst)
+				self.oncontinuedone(self.inst)
 			end
 		else
 			self.task = self.inst:DoTaskInTime(data.remainingtime, docompost, self)
 			if self.oncontinuecomposting ~= nil then
-					self.oncontinuecomposting(self.inst)
+				self.oncontinuecomposting(self.inst)
 			end
 		end
-	elseif self.oncontinuedone ~= nil then
+	else
+		ondone(self.inst, self.inst.components.composter.done)
+		if self.oncontinuedone ~= nil then
 			self.oncontinuedone(self.inst)
+		end
 	end
 
 	if self.inst.components.container ~= nil then
@@ -324,6 +331,11 @@ function Composter:Harvest(harvester)
 		end
 		self.targettime = nil
 		self.done = nil
+		self.poopamount = 0
+		self.rotamount = 0
+		self.rottyness = 0
+		self.spawnfireflies = 0
+
 
 		if self.inst.components.container then		
 			self.inst.components.container.canbeopened = true
