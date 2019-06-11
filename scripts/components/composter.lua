@@ -159,7 +159,7 @@ function Composter:StartComposting(time)
 			-- when putting a huge amount of big fruits and veggies on the pile + given spoilage, the pile becomes extra fertile
 			if self.poopamount + self.rottyness >= TUNING.COMPOSTPILE_FERTILESOIL_THRES then
 				self.fertilesoil = true
-				ThePlayer.components.talker:Say("I can see some hard working worms!")
+				-- ThePlayer.components.talker:Say("I can see some hard working worms!")
 			end
 
 			-- print("receive", self.poopamount, "poop")
@@ -336,7 +336,7 @@ function Composter:Harvest(harvester)
 		if math.random() <= self.spawnfireflies then
 			local item_inst = SpawnPrefab("fireflies")
 			item_inst.entity:SetParent(self.inst.entity)
-			ThePlayer.components.talker:Say("I see bugs!")
+			-- ThePlayer.components.talker:Say("I see bugs!")
 		end
 
 		if self.task ~= nil then
