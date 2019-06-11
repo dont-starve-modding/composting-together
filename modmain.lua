@@ -66,9 +66,7 @@ GLOBAL.ACTIONS.HARVEST.fn = function(act)
 	end 
 end
 
-GLOBAL.ACTIONS.COMPOST = GLOBAL.Action({ priority=1, mount_valid=true })
-
-GLOBAL.ACTIONS.COMPOST.fn  = function(act)
+AddAction("COMPOST", "Compost", function(act)
     if act.target.components.composter ~= nil then
         if act.target.components.composter:IsComposting() then
             return true
@@ -82,7 +80,7 @@ GLOBAL.ACTIONS.COMPOST.fn  = function(act)
         act.target.components.composter:StartComposting()
         return true
     end
-end
+end)
 
 AddComponentAction("SCENE", "composter", function(inst, doer, actions, right)
     if not inst:HasTag("burnt") and

@@ -1,5 +1,8 @@
 require "prefabutil"
 require "tuning"
+require "modutil"
+
+local containers = require("containers")
 
 local composting = require("composting")
 
@@ -105,6 +108,19 @@ local elements = {
 		},
   }
 
+
+local function onopen(inst)
+	if not inst:HasTag("burnt") then
+		inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds")
+	end
+end
+
+local function onclose(inst)
+	if not inst:HasTag("burnt") then 
+		inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds")
+	end
+end
+
 local function onhammered(inst, worker)
 	-- loot poop by destroying ur pile
 	if inst.components.composter.done then
@@ -123,7 +139,86 @@ local slotpos = {
 	Vector3((32+4),		-(32+4),		0),
 	Vector3(-(32+4),	-(64+32+8+4),	0), 
 	Vector3((32+4),		-(64+32+8+4),	0)
-}	
+}
+
+local compostpileparams =
+{
+	widget =
+	{
+		slotpos = {	
+			Vector3(0,32+4,0),
+			Vector3(-(32+4), -(32+4),0), 
+			Vector3((32+4), -(32+4),0),
+			Vector3(-(32+4), -(64+32+8+4),0), 
+			Vector3((32+4), -(64+32+8+4),0)
+		},
+		animbank = "ui_compostpile1c6x3",
+		animbuild = "ui_compostpile1c6x3",
+		pos = Vector3(200, 0, 0),
+		side_align_tip = 100,
+		buttoninfo =
+		{
+			text = "Fill",
+			position = Vector3(0, -170, 0),
+		}
+	},
+	acceptsstacks = false,
+	type = "cooker",
+}
+
+function compostpileparams.itemtestfn(container, item, slot)
+	return composting.IsCompostIngredient(item.prefab) and not container.inst:HasTag("burnt")
+end
+
+function dump(o)
+	if type(o) == 'table' then
+	   local s = '{ '
+	   for k,v in pairs(o) do
+		  if type(k) ~= 'number' then k = '"'..k..'"' end
+		  s = s .. '['..k..'] = ' .. dump(v) .. ','
+	   end
+	   return s .. '} '
+	else
+	   return tostring(o)
+	end
+ end
+
+function compostpileparams.widget.buttoninfo.fn(inst)
+	print("buttoninfo.fn")
+	-- print(tostring(ACTIONS.COMPOST))
+	print("ACTIONS.COMPOST:", dump(ACTIONS.COMPOST))
+	if inst.components.container ~= nil then
+		BufferedAction(inst.components.container.opener, inst, ACTIONS.COMPOST):Do()
+	elseif inst.replica.container ~= nil and not inst.replica.container:IsBusy() then
+		SendRPCToServer(RPC.DoWidgetButtonAction, ACTIONS.COMPOST.code, inst, ACTIONS.COMPOST.mod_name)
+	end
+end
+
+-- "can 'Fill' be clicked?"
+function compostpileparams.widget.buttoninfo.validfn(inst)
+	print("buttoninfo.validfn")
+	return inst.replica.container ~= nil and inst.replica.container:IsFull()
+end
+
+-- Overload containers.widgetsetup so we can assign widget params
+local oldwidgetsetup = containers.widgetsetup
+function containers.widgetsetup(container, prefab, data, ...)
+	-- Without this condition, the custom override would affect all container prefabs
+	if container.inst.prefab == "compostpile" then
+		--data = pickle_barrel -- can't do it this way because other mods aren't carrying third param (data) through
+
+		-- old way -- If mods ever update, we can uncomment the above assignment and get rid of this
+		-- This method sucks because if Klei changes how containers.widgetsetup(...) works, this code needs to be changed too since it's a copy
+        for k, v in pairs(compostpileparams) do
+            container[k] = v
+        end
+        container:SetNumSlots(container.widget.slotpos ~= nil and #container.widget.slotpos or 0)
+        return
+        -- /old way
+	end
+	
+    return oldwidgetsetup(container, prefab, data, ...)
+end
 
 --anim and sound callbacks
 
@@ -200,127 +295,13 @@ local function makeburnable(inst)
 	MakeLargePropagator(inst)
 end
 
-local function makecontainer(inst)
-	
-	local function onopen(inst)
-		if not inst:HasTag("burnt") then
-			inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds")
-		end
-	end
-
-	local function onclose(inst)
-		if not inst:HasTag("burnt") then 
-			inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds")
-		end
-	end
-
-	local compostpileparams =
-	{
-		widget =
-		{
-			slotpos = {	
-				Vector3(0,32+4,0),
-				Vector3(-(32+4), -(32+4),0), 
-				Vector3((32+4), -(32+4),0),
-				Vector3(-(32+4), -(64+32+8+4),0), 
-				Vector3((32+4), -(64+32+8+4),0)
-			},
-			animbank = "ui_compostpile1c6x3",
-			animbuild = "ui_compostpile1c6x3",
-			pos = Vector3(200, 0, 0),
-			side_align_tip = 100,
-			buttoninfo =
-			{
-				text = "Fill",
-				position = Vector3(0, -170, 0),
-			}
-		},
-		acceptsstacks = false,
-		type = "cooker",
-	}
-	
-	function compostpileparams.itemtestfn(container, item, slot)
-		return composting.IsCompostIngredient(item.prefab) and not container.inst:HasTag("burnt")
-	end
-	
-	function compostpileparams.widget.buttoninfo.fn(inst)
-		if inst.components.container ~= nil then
-			BufferedAction(inst.components.container.opener, inst, ACTIONS.COMPOST):Do()
-		elseif inst.replica.container ~= nil and not inst.replica.container:IsBusy() then
-			SendRPCToServer(RPC.DoWidgetButtonAction, ACTIONS.COMPOST.code, inst, ACTIONS.COMPOST.mod_name)
-		end
-	end
-	
-	-- "can 'Fill' be clicked?"
-	function compostpileparams.widget.buttoninfo.validfn(inst)
-		local num = 0
-		for k,v in pairs (inst.components.container.slots) do
-			num = num + 1 
-		end
-
-		return inst.replica.container ~= nil and num > 2
-	end
-
-	inst:AddComponent("container")
-	inst.components.container:WidgetSetup("compostpile", compostpileparams)
-    inst.components.container.onopenfn = onopen
-    inst.components.container.onclosefn = onclose
-end
-
-local function makecomposter(inst)
-
-	local function startcompostfn(inst)
-		if not inst:HasTag("burnt") then
-			inst.AnimState:PlayAnimation("idle_empty")
-
-			removeflies(inst)
-			-- inst:RemoveComponent("burnable")
-		end
-	end
-
-	local function donecompostfn(inst)
-		if not inst:HasTag("burnt") then
-			inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds")
-			inst.AnimState:PlayAnimation("idle_full")
-			addflies(inst)
-		end
-	end
-
-	local function continuedonefn(inst)
-		inst.AnimState:PlayAnimation("idle_full")
-		addflies(inst)
-	end
-
-	local function continuecompostfn(inst)
-		if not inst:HasTag("burnt") then
-			removeflies(inst)
-			inst.AnimState:PlayAnimation("idle_empty")
-		end
-	end
-
-	local function harvestfn(inst)
-		if not inst:HasTag("burnt") then
-			inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds") 
-			inst.AnimState:PlayAnimation("idle_empty")
-			-- removeflies(inst)		
-		end
-		removeflies(inst)
-	end
-
-    inst:AddComponent("composter")
-    inst.components.composter.onstartcomposting = startcompostfn
-    inst.components.composter.oncontinuecomposting = continuecompostfn
-    inst.components.composter.oncontinuedone = continuedonefn
-    inst.components.composter.ondonecomposting = donecompostfn
-    inst.components.composter.onharvest = harvestfn
-end
-
 local function OnHaunt(inst, haunter)
     return false
 end
 
 local function fn()
-	
+	print("fn")
+
 	local function onsave(inst, data)
 		print("onsave...")
 		print(data.burnt)
@@ -373,6 +354,7 @@ local function fn()
 	inst.entity:AddMiniMapEntity()
 	inst.entity:AddNetwork()
 
+
 	MakeObstaclePhysics(inst, 0.9)
     
     inst:AddTag("structure")
@@ -380,26 +362,40 @@ local function fn()
     inst.AnimState:SetBank("compostpile")
     inst.AnimState:SetBuild("compostpile")
 	inst.AnimState:PlayAnimation("idle_empty")
-	inst.AnimState:SetOrientation(ANIM_ORIENTATION.OnGround)
+	inst.AnimState:SetOrientation(ANIM_ORIENTATION.Default)
 	inst.AnimState:SetLayer(LAYER_BACKGROUND)
 	inst.AnimState:SetSortOrder(3)
 	
 	inst.MiniMapEntity:SetIcon("farm2.png")
 
 	-- is called only on server load, not on built (see above!)
-	inst.Transform:SetRotation(45)
+	-- inst.Transform:SetRotation(45)
 	
 	inst._burnt = net_bool(inst.GUID, "compostpile._burnt", "burntdirty")
 
 	inst.decor = {}
 
+	for k, item_info in pairs(elements) do
+		for item_name, item_offsets in pairs(item_info) do
+			for l, offset in pairs(item_offsets) do
+				local item_inst = SpawnPrefab(item_name)
+				item_inst.entity:SetParent(inst.entity)
+				item_inst.Transform:SetPosition(offset[1], offset[2], offset[3])
+				table.insert(inst.decor, item_inst)
+			end
+		end
+	end
+
+	print("ismastersim " .. tostring(TheWorld.ismastersim))
+	if not TheWorld.ismastersim then
+		inst:ListenForEvent("burntdirty", OnBurntDirty)
+
+		return inst
+	end
+
 	MakeSnowCoveredPristine(inst)
 
 	inst.entity:SetPristine()
-
-	if not TheWorld.ismastersim then
-		return inst
-	end
 
 	inst:AddComponent("inspectable")
 	inst.components.inspectable.nameoverride = "COMPOSTPILE"
@@ -416,12 +412,63 @@ local function fn()
     -- inst.components.inventoryitem:SetOnPickupFn(function() if inst.flies then inst.flies:Remove() inst.flies = nil end end)
     -- inst.components.inventoryitem:SetOnPutInInventoryFn(function() if inst.flies then inst.flies:Remove() inst.flies = nil end end)
 
-	makecontainer(inst)
+	print("makecontainer")
+
+	inst:AddComponent("container")
+	inst.components.container:WidgetSetup("compostpile", compostpileparams)
+	-- inst.components.container:WidgetSetup("cookpot")
+    inst.components.container.onopenfn = onopen
+    inst.components.container.onclosefn = onclose
 
 	inst:ListenForEvent("burntup", OnBurnt)  
 	inst:ListenForEvent("onbuilt", onbuilt)
 
-	makecomposter(inst)
+	print("makecomposter")
+
+	local function startcompostfn(inst)
+		if not inst:HasTag("burnt") then
+			inst.AnimState:PlayAnimation("idle_empty")
+
+			removeflies(inst)
+			-- inst:RemoveComponent("burnable")
+		end
+	end
+
+	local function donecompostfn(inst)
+		if not inst:HasTag("burnt") then
+			inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds")
+			inst.AnimState:PlayAnimation("idle_full")
+			addflies(inst)
+		end
+	end
+
+	local function continuedonefn(inst)
+		inst.AnimState:PlayAnimation("idle_full")
+		addflies(inst)
+	end
+
+	local function continuecompostfn(inst)
+		if not inst:HasTag("burnt") then
+			removeflies(inst)
+			inst.AnimState:PlayAnimation("idle_empty")
+		end
+	end
+
+	local function harvestfn(inst)
+		if not inst:HasTag("burnt") then
+			inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds") 
+			inst.AnimState:PlayAnimation("idle_empty")
+			-- removeflies(inst)		
+		end
+		removeflies(inst)
+	end
+
+    inst:AddComponent("composter")
+    inst.components.composter.onstartcomposting = startcompostfn
+    inst.components.composter.oncontinuecomposting = continuecompostfn
+    inst.components.composter.oncontinuedone = continuedonefn
+    inst.components.composter.ondonecomposting = donecompostfn
+    inst.components.composter.onharvest = harvestfn
 
     inst:AddComponent("lootdropper")
     inst:AddComponent("workable")
@@ -434,17 +481,6 @@ local function fn()
 	inst:AddComponent("hauntable")
 	inst.components.hauntable.cooldown = TUNING.HAUNT_COOLDOWN_SMALL
 	inst.components.hauntable:SetOnHauntFn(OnHaunt)
-
-	for k, item_info in pairs(elements) do
-		for item_name, item_offsets in pairs(item_info) do
-			for l, offset in pairs(item_offsets) do
-				local item_inst = SpawnPrefab(item_name)
-				item_inst.entity:SetParent(inst.entity)
-				item_inst.Transform:SetPosition(offset[1], offset[2], offset[3])
-				table.insert(inst.decor, item_inst)
-			end
-		end
-	end
 
     MakeSnowCovered(inst)
 

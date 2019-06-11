@@ -1,8 +1,7 @@
 name = "Composting Together"
-description = "Adds a compost pile to the game. Make the best out of your spoiled food!"
+version = "0.2.2"
+description = "Version " .. version .. "\n\n Adds a compost pile to the game. Make the best out of your spoiled food!"
 author = "s1m13"
-
-version = "0.2.0"
 
 api_version = 10
 
