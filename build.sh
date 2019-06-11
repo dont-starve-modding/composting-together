@@ -10,6 +10,7 @@ mkdir -p build/anim
 
 echo "compiling animations..."
 "C:\Program Files (x86)\Steam\steamapps\common\Don't Starve Mod Tools\mod_tools\scml.exe" compostpile.scml .
+"C:\Program Files (x86)\Steam\steamapps\common\Don't Starve Mod Tools\mod_tools\scml.exe" ui_compostpile1c6x3/ui_compostpile1c6x3.scml .
 
 echo "copying files and scripts..."
 cp -r scripts/* build/scripts/
