@@ -87,11 +87,20 @@ AddComponentAction("SCENE", "composter", function(inst, doer, actions, right)
         not (doer.replica.rider ~= nil and doer.replica.rider:IsRiding()) then
         if inst:HasTag("donecomposting") then
             table.insert(actions, GLOBAL.ACTIONS.HARVEST)
-        elseif right and inst:HasTag("readytocompost") then
-            table.insert(actions, GLOBAL.ACTIONS.COMPOST)
         end
     end
 end)
+
+-- AddComponentAction("SCENE", "composter", function(inst, doer, actions, right)
+--     if not inst:HasTag("burnt") and
+--         not (doer.replica.rider ~= nil and doer.replica.rider:IsRiding()) then
+--         if inst:HasTag("donecomposting") then
+--             table.insert(actions, GLOBAL.ACTIONS.HARVEST)
+--         elseif right and inst:HasTag("readytocompost") then
+--             table.insert(actions, GLOBAL.ACTIONS.COMPOST)
+--         end
+--     end
+-- end)
 
 -- constants
 
