@@ -1,5 +1,5 @@
 name = "Composting Together"
-version = "0.2.2"
+version = "0.2.3"
 description = "Version " .. version .. "\n\n Adds a compost pile to the game. Make the best out of your spoiled food!"
 author = "s1m13"
 
@@ -25,6 +25,7 @@ configuration_options =
     {
         name = "poop_amount",
         label = "Poop amount",
+        hover = "The amount of poop that is produced while composting. Higher is easier.",
         options = {
             { description = "Low", data = "low" },
             { description = "Default", data = "default" },
@@ -36,10 +37,11 @@ configuration_options =
     {
         name = "compost_duration",
         label = "Compost duration",
+        hover = "The duration it takes to produce poop.",
         options = {
-            { description = "Realistic", data = "realistic" },
+            { description = "Long", data = "realistic" },
             { description = "Default", data = "default" },
-            { description = "Efficient", data = "efficient" },
+            { description = "Short", data = "efficient" },
         },
         default = "default",
     },
@@ -47,6 +49,7 @@ configuration_options =
     {
         name = "cost",
         label = "Cost",
+        hover = "The cost of the compostpile to build initially. Lower is easier.",
         options = {
             { description = "Low", data = "low" },
             { description = "Default", data = "default" },
@@ -58,6 +61,7 @@ configuration_options =
     {
         name = "fertile_soil_advantage",
         label = "Fertile soil advantage",
+        hover = "The bonus you receive in the form of poop after triggering the fertile soil advantage (read the documentation). Higher is easier.",
         options = {
             { description = "Low", data = "low" },
             { description = "Default", data = "default" },
@@ -69,6 +73,7 @@ configuration_options =
     {
         name = "spawn_fireflies",
         label = "Attract Fireflies",
+        hover = "Whether or not fireflies can be spawned after composting (read the documentation). Always is easiest.",
         options = {
             { description = "Always", data = "always" },
             { description = "On", data = "on" },
